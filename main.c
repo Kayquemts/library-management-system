@@ -78,29 +78,68 @@ int main()
                 }
                 else
                 {
-                    Reserva reserva;
-
-                    strcpy(
-                        reserva.nomeUsuario,
-                        nome
-                    );
-
-                    reserva.codigoLivro =
-                        livro.codigo;
-
-                    enfileirarReserva(
-                        fila,
-                        reserva
-                    );
+                    int resposta;
 
                     printf(
-                        "\nSem exemplares.\n"
+                        "\nSem exemplares disponiveis.\n"
                     );
 
-                    printf(
-                        "%s entrou na fila.\n",
-                        nome
+                    do
+                    {
+                        printf(
+                            "\nDeseja entrar na fila de espera?\n"
+                        );
+
+                        printf(
+                            "1 - Sim\n"
+                        );
+
+                        printf(
+                            "2 - Nao\n"
+                        );
+
+                        printf(
+                            "Opcao: "
+                        );
+
+                        scanf(
+                            "%d",
+                            &resposta
+                        );
+
+                    } while(
+                        resposta != 1 &&
+                        resposta != 2
                     );
+
+                    if(resposta == 1)
+                    {
+                        Reserva reserva;
+
+                        strcpy(
+                            reserva.nomeUsuario,
+                            nome
+                        );
+
+                        reserva.codigoLivro =
+                            livro.codigo;
+
+                        enfileirarReserva(
+                            fila,
+                            reserva
+                        );
+
+                        printf(
+                            "\n%s entrou na fila.\n",
+                            nome
+                        );
+                    }
+                    else
+                    {
+                        printf(
+                            "\nOperacao cancelada.\n"
+                        );
+                    }
                 }
 
                 break;
