@@ -180,7 +180,6 @@ int main()
             case 4:
 
                 mostrarFila(fila);
-
                 break;
 
             case 0:
@@ -200,5 +199,63 @@ int main()
 
     } while(opcao != 0);
 
+    // TODO: Liberar a memória da árvore antes de fechar
+    free(acervo);
     return 0;
+}
+
+// Imprime as opções textuais na tela
+void exibirMenu() {
+    printf("\n========================================\n");
+    printf("   SISTEMA DE GERENCIAMENTO DE BIBLIOTECA \n");
+    printf("========================================\n");
+    printf("a. Cadastrar novo livro\n");
+    printf("b. Buscar livro por codigo\n");
+    printf("c. Listar livros em ordem crescente de codigo\n");
+    printf("d. Listar livros em pre-ordem\n");
+    printf("e. Listar livros em pos-ordem\n");
+    printf("f. Mostrar Arvore\n");
+    printf("j. Exibir quantidade de livros cadastrados\n");
+    printf("k. Exibir altura da arvore\n");
+    printf("s. Sair\n");
+    printf("========================================\n");
+    printf("Escolha uma opcao: ");
+}
+
+// Função responsável por interagir com o usuário e alimentar a árvore
+void cadastrarLivro(Arvore *acervo) {
+    int codigo, ano, quantidadeTotal;
+    char titulo[100];
+    char autor[100];
+
+    printf("\n--- Cadastrar Novo Livro ---\n");
+
+    printf("Digite o codigo do livro: ");
+    scanf("%d", &codigo);
+
+    /* O " %[^\n]" resolve o problema do buffer:
+       O espaço inicial ignora o \n deixado pelo scanf anterior.
+       O [^\n] faz ler a frase inteira com espaços até você apertar ENTER. */
+    printf("Digite o titulo do livro: ");
+    scanf(" %[^\n]", titulo);
+    
+    printf("Digite o nome do autor do livro: ");
+    scanf(" %[^\n]", autor);
+
+    printf("Digite o ano de publicacao do livro: ");
+    scanf("%d", &ano);
+
+    printf("Digite a quantidade total de exemplares: ");
+    scanf("%d", &quantidadeTotal);
+
+    /* Envia os dados para o TAD criar a estrutura na memória.
+       Repare que passamos 5 parâmetros conforme exigido no PDF [cite: 57, 223-229]. */
+    Livro *novoLivro = criarLivro(codigo, titulo, autor, ano, quantidadeTotal);
+
+    if (novoLivro != NULL) {
+        inserirLivroArvore(acervo, novoLivro);
+        printf("\n[SUCESSO] Livro '%s' cadastrado com sucesso!\n", titulo);
+    } else {
+        printf("\n[ERRO] Falha crítica de memória ao gerar a entidade do livro.\n");
+    }
 }
