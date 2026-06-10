@@ -139,3 +139,42 @@ void printarArvoreVisual(Arvore *arvore) {
     exibirEstruturaArvore(arvore->raiz, 0);
     printf("-------------------------------------\n");
 }
+
+int contarLivros ( Arvore * arvore ){
+    printf("\n[AVISO] Funcao contarLivros ainda nao implementada.\n");
+    return 0; // Retorna 0 temporariamente
+}
+
+int calcularAlturaArvore ( Arvore * arvore ){
+    printf("\n[AVISO] Funcao calcularAlturaArvore ainda nao implementada.\n");
+    return 0; // Retorna 0 temporariamente
+}
+
+Livro * buscarLivroArvore ( Arvore * arvore , int codigo ) {
+    NoArvore * atual = arvore->raiz ;
+    while (atual != NULL) {
+        if (codigo == atual->livro->codigo) {
+            return atual->livro; // Livro encontrado
+        } else if (codigo < atual->livro->codigo) {
+            atual = atual->esquerda; // Vai para a esquerda
+        } else {
+            atual = atual->direita; // Vai para a direita
+        }
+    }
+    return NULL; // Livro nao encontrado
+}
+
+int obterCodigoLivro (Livro * livro ){
+    return livro->codigo;
+}
+
+int obterQuantidadeDisponivel (Livro * livro ){
+    return livro->quantidadeDisponivel;
+}
+
+void emprestarExemplar (Livro * livro ){
+    printf("\n[AVISO] Funcao emprestarExemplar ainda nao implementada.\n");
+}
+void devolverExemplar (Livro * livro ){
+    printf("\n[AVISO] Funcao devolverExemplar ainda nao implementada.\n");
+}

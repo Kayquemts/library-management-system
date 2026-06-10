@@ -1,261 +1,342 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "livro.h"
+#include "Livro.h"
+#include "Arvore.h"
 #include "fila.h"
+#include "lista.h"
 
-int main()
-{
-    Livro livro;
+/* ─── protótipos das funções auxiliares do menu ─────────────── */
+void exibirMenu();
+void cadastrarLivro    (Arvore *acervo);
+void buscarLivro       (Arvore *acervo);
+void realizarEmprestimo(Arvore *acervo, Fila *filaReservas, Lista *historico);
+void realizarDevolucao (Arvore *acervo, Fila *filaReservas, Lista *historico);
 
-    livro.codigo = 10;
+/* ─────────────────────────────────────────────────────────────
+ *  MAIN
+ * ───────────────────────────────────────────────────────────── */
+int main() {
 
-    strcpy(
-        livro.titulo,
-        "Clean Code"
-    );
+    /* Inicializa as três estruturas principais */
+    Arvore *acervo       = criarArvore();
+    Fila   *filaReservas = criarFila();
+    Lista  *historico    = criarLista();
 
-    livro.quantidadeDisponivel = 1;
-
-    Fila* fila =
-        criarFila();
+    if (acervo == NULL || filaReservas == NULL || historico == NULL) {
+        printf("[ERRO FATAL] Falha ao alocar estruturas principais.\n");
+        return 1;
+    }
 
     int opcao;
 
-    do
-    {
-        printf("\n");
-        printf("1 - Mostrar livro\n");
-        printf("2 - Solicitar emprestimo\n");
-        printf("3 - Devolver livro\n");
-        printf("4 - Mostrar fila\n");
-        printf("0 - Sair\n");
-
-        printf("Opcao: ");
+    do {
+        exibirMenu();
         scanf("%d", &opcao);
+        getchar(); /* limpa o '\n' do buffer */
 
-        getchar();
+        switch (opcao) {
 
-        switch(opcao)
-        {
             case 1:
-
-                exibirLivro(&livro);
-
+                cadastrarLivro(acervo);
                 break;
 
             case 2:
-            {
-                char nome[100];
-
-                printf(
-                    "Nome do usuario: "
-                );
-
-                fgets(
-                    nome,
-                    sizeof(nome),
-                    stdin
-                );
-
-                nome[
-                    strcspn(
-                        nome,
-                        "\n"
-                    )
-                ] = '\0';
-
-                if(
-                    livro.quantidadeDisponivel > 0
-                )
-                {
-                    livro.quantidadeDisponivel--;
-
-                    printf(
-                        "\nLivro emprestado para %s\n",
-                        nome
-                    );
-                }
-                else
-                {
-                    int resposta;
-
-                    printf(
-                        "\nSem exemplares disponiveis.\n"
-                    );
-
-                    do
-                    {
-                        printf(
-                            "\nDeseja entrar na fila de espera?\n"
-                        );
-
-                        printf(
-                            "1 - Sim\n"
-                        );
-
-                        printf(
-                            "2 - Nao\n"
-                        );
-
-                        printf(
-                            "Opcao: "
-                        );
-
-                        scanf(
-                            "%d",
-                            &resposta
-                        );
-
-                    } while(
-                        resposta != 1 &&
-                        resposta != 2
-                    );
-
-                    if(resposta == 1)
-                    {
-                        Reserva reserva;
-
-                        strcpy(
-                            reserva.nomeUsuario,
-                            nome
-                        );
-
-                        reserva.codigoLivro =
-                            livro.codigo;
-
-                        enfileirarReserva(
-                            fila,
-                            reserva
-                        );
-
-                        printf(
-                            "\n%s entrou na fila.\n",
-                            nome
-                        );
-                    }
-                    else
-                    {
-                        printf(
-                            "\nOperacao cancelada.\n"
-                        );
-                    }
-                }
-
+                buscarLivro(acervo);
                 break;
-            }
 
             case 3:
-            {
-                livro.quantidadeDisponivel++;
-
-                printf(
-                    "\nLivro devolvido.\n"
-                );
-
-                if(
-                    !filaVazia(fila)
-                )
-                {
-                    Reserva proximo =
-                        desenfileirarReserva(
-                            fila
-                        );
-
-                    printf(
-                        "\nPrimeiro da fila: %s\n",
-                        proximo.nomeUsuario
-                    );
-
-                    printf(
-                        "Livro reservado para ele.\n"
-                    );
-
-                    livro.quantidadeDisponivel--;
-                }
-
+                printf("\n=== LISTAGEM EM ORDEM CRESCENTE ===\n");
+                listarLivrosEmOrdem(acervo);
                 break;
-            }
 
             case 4:
+                printf("\n=== LISTAGEM EM PRE-ORDEM ===\n");
+                listarLivrosPreOrdem(acervo);
+                break;
 
-                mostrarFila(fila);
+            case 5:
+                printf("\n=== LISTAGEM EM POS-ORDEM ===\n");
+                listarLivrosPosOrdem(acervo);
+                break;
+
+            case 6:
+                realizarEmprestimo(acervo, filaReservas, historico);
+                break;
+
+            case 7:
+                realizarDevolucao(acervo, filaReservas, historico);
+                break;
+
+            case 8:
+                mostrarFila(filaReservas);
+                break;
+
+            case 9:
+                printf("\n=== HISTORICO DE EMPRESTIMOS ===\n");
+                listarEmprestimos(historico);
+                break;
+
+            case 10:
+                printf("\nQuantidade de livros cadastrados: %d\n",
+                       contarLivros(acervo));
+                break;
+
+            case 11:
+                printf("\nAltura da arvore: %d\n",
+                       calcularAlturaArvore(acervo));
+                break;
+
+            case 12:
+                /* Funcionalidade extra: exibição visual da árvore */
+                printarArvoreVisual(acervo);
                 break;
 
             case 0:
-
-                printf(
-                    "\nEncerrando...\n"
-                );
-
+                printf("\nEncerrando o sistema. Ate logo!\n");
                 break;
 
             default:
-
-                printf(
-                    "\nOpcao invalida.\n"
-                );
+                printf("\n[AVISO] Opcao invalida. Tente novamente.\n");
         }
 
-    } while(opcao != 0);
+    } while (opcao != 0);
 
-    // TODO: Liberar a memória da árvore antes de fechar
+    /* Libera a memória antes de encerrar */
+    liberarLista(historico);
+    /* Fila e árvore: liberação básica das estruturas externas */
+    free(filaReservas);
     free(acervo);
+
     return 0;
 }
 
-// Imprime as opções textuais na tela
+/* ─────────────────────────────────────────────────────────────
+ *  MENU
+ * ───────────────────────────────────────────────────────────── */
 void exibirMenu() {
     printf("\n========================================\n");
-    printf("   SISTEMA DE GERENCIAMENTO DE BIBLIOTECA \n");
+    printf("   SISTEMA DE GERENCIAMENTO DE BIBLIOTECA\n");
     printf("========================================\n");
-    printf("a. Cadastrar novo livro\n");
-    printf("b. Buscar livro por codigo\n");
-    printf("c. Listar livros em ordem crescente de codigo\n");
-    printf("d. Listar livros em pre-ordem\n");
-    printf("e. Listar livros em pos-ordem\n");
-    printf("f. Mostrar Arvore\n");
-    printf("j. Exibir quantidade de livros cadastrados\n");
-    printf("k. Exibir altura da arvore\n");
-    printf("s. Sair\n");
+    printf(" 1. Cadastrar novo livro\n");
+    printf(" 2. Buscar livro por codigo\n");
+    printf(" 3. Listar livros em ordem crescente\n");
+    printf(" 4. Listar livros em pre-ordem\n");
+    printf(" 5. Listar livros em pos-ordem\n");
+    printf(" 6. Realizar emprestimo\n");
+    printf(" 7. Devolver livro\n");
+    printf(" 8. Exibir fila de reservas\n");
+    printf(" 9. Exibir historico de emprestimos\n");
+    printf("10. Exibir quantidade de livros cadastrados\n");
+    printf("11. Exibir altura da arvore\n");
+    printf("12. [EXTRA] Visualizar estrutura da arvore\n");
+    printf(" 0. Sair\n");
     printf("========================================\n");
-    printf("Escolha uma opcao: ");
+    printf("Opcao: ");
 }
 
-// Função responsável por interagir com o usuário e alimentar a árvore
+/* ─────────────────────────────────────────────────────────────
+ *  CADASTRAR LIVRO
+ * ───────────────────────────────────────────────────────────── */
 void cadastrarLivro(Arvore *acervo) {
-    int codigo, ano, quantidadeTotal;
+    int  codigo, ano, quantidadeTotal;
     char titulo[100];
     char autor[100];
 
-    printf("\n--- Cadastrar Novo Livro ---\n");
+    printf("\n--- CADASTRAR NOVO LIVRO ---\n");
 
-    printf("Digite o codigo do livro: ");
+    printf("Codigo       : ");
     scanf("%d", &codigo);
+    getchar();
 
-    /* O " %[^\n]" resolve o problema do buffer:
-       O espaço inicial ignora o \n deixado pelo scanf anterior.
-       O [^\n] faz ler a frase inteira com espaços até você apertar ENTER. */
-    printf("Digite o titulo do livro: ");
+    /* Verifica duplicata antes de pedir todos os dados */
+    if (buscarLivroArvore(acervo, codigo) != NULL) {
+        printf("[ERRO] Ja existe um livro com o codigo %d.\n", codigo);
+        return;
+    }
+
+    printf("Titulo       : ");
     scanf(" %[^\n]", titulo);
-    
-    printf("Digite o nome do autor do livro: ");
+
+    printf("Autor        : ");
     scanf(" %[^\n]", autor);
 
-    printf("Digite o ano de publicacao do livro: ");
+    printf("Ano          : ");
     scanf("%d", &ano);
+    getchar();
 
-    printf("Digite a quantidade total de exemplares: ");
+    printf("Qtd exemplares: ");
     scanf("%d", &quantidadeTotal);
+    getchar();
 
-    /* Envia os dados para o TAD criar a estrutura na memória.
-       Repare que passamos 5 parâmetros conforme exigido no PDF [cite: 57, 223-229]. */
+    if (quantidadeTotal <= 0) {
+        printf("[ERRO] A quantidade de exemplares deve ser maior que zero.\n");
+        return;
+    }
+
     Livro *novoLivro = criarLivro(codigo, titulo, autor, ano, quantidadeTotal);
 
     if (novoLivro != NULL) {
         inserirLivroArvore(acervo, novoLivro);
-        printf("\n[SUCESSO] Livro '%s' cadastrado com sucesso!\n", titulo);
+        printf("[SUCESSO] Livro '%s' cadastrado com sucesso!\n", titulo);
     } else {
-        printf("\n[ERRO] Falha crítica de memória ao gerar a entidade do livro.\n");
+        printf("[ERRO] Falha de memoria ao criar o livro.\n");
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ *  BUSCAR LIVRO
+ * ───────────────────────────────────────────────────────────── */
+void buscarLivro(Arvore *acervo) {
+    int codigo;
+
+    printf("\n--- BUSCAR LIVRO ---\n");
+    printf("Codigo do livro: ");
+    scanf("%d", &codigo);
+    getchar();
+
+    Livro *encontrado = buscarLivroArvore(acervo, codigo);
+
+    if (encontrado != NULL) {
+        printf("\n[ENCONTRADO]\n");
+        exibirLivro(encontrado);
+    } else {
+        printf("[AVISO] Livro com codigo %d nao encontrado.\n", codigo);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ *  REALIZAR EMPRESTIMO
+ * ───────────────────────────────────────────────────────────── */
+void realizarEmprestimo(Arvore *acervo, Fila *filaReservas, Lista *historico) {
+    int  codigo;
+    char nomeUsuario[100];
+
+    printf("\n--- REALIZAR EMPRESTIMO ---\n");
+
+    printf("Codigo do livro: ");
+    scanf("%d", &codigo);
+    getchar();
+
+    Livro *livro = buscarLivroArvore(acervo, codigo);
+
+    if (livro == NULL) {
+        printf("[ERRO] Livro com codigo %d nao encontrado no acervo.\n", codigo);
+        return;
+    }
+
+    printf("Nome do usuario: ");
+    scanf(" %[^\n]", nomeUsuario);
+
+    /* ── Caso 1: há exemplares disponíveis ── */
+    if (obterQuantidadeDisponivel(livro) > 0) {
+
+        emprestarExemplar(livro);
+
+        /* Registra no histórico */
+        Emprestimo emp;
+        strncpy(emp.nomeUsuario, nomeUsuario, 99);
+        emp.nomeUsuario[99] = '\0';
+        emp.codigoLivro = obterCodigoLivro(livro);
+        strncpy(emp.tituloLivro, livro->titulo, 99);
+        emp.tituloLivro[99] = '\0';
+
+        inserirEmprestimo(historico, emp);
+
+        printf("[SUCESSO] Emprestimo realizado!\n");
+        printf("  Usuario : %s\n", nomeUsuario);
+        printf("  Livro   : %s (cod. %d)\n", livro->titulo, livro->codigo);
+        printf("  Disponiveis restantes: %d\n", obterQuantidadeDisponivel(livro));
+
+    /* ── Caso 2: sem exemplares disponíveis → oferecer reserva ── */
+    } else {
+        printf("\n[AVISO] Nao ha exemplares disponiveis para '%s'.\n", livro->titulo);
+
+        int resposta;
+        do {
+            printf("Deseja entrar na fila de reservas?\n");
+            printf("  1 - Sim\n");
+            printf("  2 - Nao\n");
+            printf("Opcao: ");
+            scanf("%d", &resposta);
+            getchar();
+        } while (resposta != 1 && resposta != 2);
+
+        if (resposta == 1) {
+            Reserva reserva;
+            strncpy(reserva.nomeUsuario, nomeUsuario, 99);
+            reserva.nomeUsuario[99] = '\0';
+            reserva.codigoLivro = obterCodigoLivro(livro);
+
+            enfileirarReserva(filaReservas, reserva);
+            printf("[INFO] %s entrou na fila de reservas para '%s'.\n",
+                   nomeUsuario, livro->titulo);
+        } else {
+            printf("[INFO] Operacao cancelada.\n");
+        }
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ *  REALIZAR DEVOLUCAO
+ * ───────────────────────────────────────────────────────────── */
+void realizarDevolucao(Arvore *acervo, Fila *filaReservas, Lista *historico) {
+    int codigo;
+
+    printf("\n--- DEVOLVER LIVRO ---\n");
+    printf("Codigo do livro: ");
+    scanf("%d", &codigo);
+    getchar();
+
+    Livro *livro = buscarLivroArvore(acervo, codigo);
+
+    if (livro == NULL) {
+        printf("[ERRO] Livro com codigo %d nao encontrado no acervo.\n", codigo);
+        return;
+    }
+
+    devolverExemplar(livro);
+    printf("[SUCESSO] Devolucao registrada para '%s'.\n", livro->titulo);
+    printf("  Disponiveis agora: %d/%d\n",
+           obterQuantidadeDisponivel(livro), livro->quantidadeTotal);
+
+    /*
+     * Percorre a fila procurando a primeira reserva para ESTE livro.
+     * Como a fila pode ter reservas de livros diferentes, precisamos
+     * verificar o código antes de desenfileirar.
+     *
+     * Estratégia: verificamos o início; se for deste livro, atendemos.
+     * Caso contrário, apenas avisamos que existe fila para ele.
+     */
+    if (!filaVazia(filaReservas)) {
+
+        /* Verifica se o primeiro da fila está esperando por este livro */
+        NoFila *primeiro = filaReservas->inicio;
+
+        if (primeiro->reserva.codigoLivro == codigo) {
+
+            Reserva proximo = desenfileirarReserva(filaReservas);
+            emprestarExemplar(livro); /* reserva o exemplar recém-devolvido */
+
+            /* Registra o empréstimo automático no histórico */
+            Emprestimo emp;
+            strncpy(emp.nomeUsuario, proximo.nomeUsuario, 99);
+            emp.nomeUsuario[99] = '\0';
+            emp.codigoLivro = obterCodigoLivro(livro);
+            strncpy(emp.tituloLivro, livro->titulo, 99);
+            emp.tituloLivro[99] = '\0';
+
+            inserirEmprestimo(historico, emp);
+
+            printf("[INFO] Exemplar automaticamente reservado para '%s' (primeiro da fila).\n",
+                   proximo.nomeUsuario);
+            printf("  Disponiveis agora: %d/%d\n",
+                   obterQuantidadeDisponivel(livro), livro->quantidadeTotal);
+
+        } else {
+            /* Há fila, mas o primeiro espera outro livro */
+            printf("[INFO] Ha usuarios na fila de reservas. Use a opcao 8 para visualizar.\n");
+        }
     }
 }
