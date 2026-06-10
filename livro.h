@@ -1,14 +1,20 @@
 #ifndef LIVRO_H
 #define LIVRO_H
 
-typedef struct {
-
-    int codigo;
-    char titulo[100];
-    int quantidadeDisponivel;
-
+typedef struct Livro{
+    int codigo ;
+    char titulo [100];
+    char autor [100];
+    int ano ;
+    int quantidadeTotal ;
+    int quantidadeDisponivel ;
 } Livro;
 
-void exibirLivro(Livro* livro);
+Livro * criarLivro (int codigo, char titulo [], char autor [], int ano , int quantidadeTotal);
+void exibirLivro (Livro * livro );
+int obterCodigoLivro (Livro * livro );
+int obterQuantidadeDisponivel (Livro * livro );
+void emprestarExemplar (Livro * livro );
+void devolverExemplar (Livro * livro );
 
 #endif
