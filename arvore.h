@@ -1,12 +1,13 @@
 #ifndef ARVORE_H
 #define ARVORE_H
 
-#include "Livro.h"
+#include "livro.h"
 
 typedef struct NoArvore {
     Livro * livro ;
     struct NoArvore * esquerda ;
     struct NoArvore * direita ;
+    int altura ;
 } NoArvore ;
 
 typedef struct Arvore {
