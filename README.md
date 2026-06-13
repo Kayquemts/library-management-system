@@ -79,10 +79,10 @@ gcc main.c livro.c Arvore.c fila.c lista.c -o biblioteca
 - [x] Estrutura `Livro` com todos os campos obrigatórios
 - [x] `criarLivro()` — alocação e inicialização com `strncpy` seguro
 - [x] `exibirLivro()` — exibição formatada
-- [ ] `obterCodigoLivro()` — **declarada no .h, NÃO implementada no .c**
-- [ ] `obterQuantidadeDisponivel()` — **declarada no .h, NÃO implementada no .c**
-- [ ] `emprestarExemplar()` — **declarada no .h, NÃO implementada no .c**
-- [ ] `devolverExemplar()` — **declarada no .h, NÃO implementada no .c**
+- [x] `obterCodigoLivro()` — retorna o codigo do livro se existir 
+- [x] `obterQuantidadeDisponivel()` — retorna a quantidade de livro se existir
+- [x] `emprestarExemplar()` 
+- [x] `devolverExemplar()` 
 
 ### ✅ Árvore Binária de Busca (`Arvore.h` / `Arvore.c`)
 - [x] Estruturas `NoArvore` e `Arvore`

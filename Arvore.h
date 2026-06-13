@@ -7,6 +7,7 @@ typedef struct NoArvore {
     Livro * livro ;
     struct NoArvore * esquerda ;
     struct NoArvore * direita ;
+    int altura ;
 } NoArvore ;
 
 typedef struct Arvore {
