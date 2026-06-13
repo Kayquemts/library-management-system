@@ -1,7 +1,7 @@
 #ifndef ARVORE_H
 #define ARVORE_H
 
-#include "Livro.h"
+#include "livro.h"
 
 typedef struct NoArvore {
     Livro * livro ;

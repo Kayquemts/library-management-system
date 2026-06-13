@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Livro.h"
-#include "Arvore.h"
+#include "livro.h"
+#include "arvore.h"
 
 Arvore * criarArvore () {
     Arvore * novaArvore = (Arvore *) malloc(sizeof(Arvore));
