@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Livro.h"
-#include "Arvore.h"
+#include "livro.h"
+#include "arvore.h"
 #include "fila.h"
 #include "lista.h"
 

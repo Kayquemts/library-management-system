@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Livro.h"
+#include "livro.h"
 #include <string.h>
 
 Livro * criarLivro (int codigo, char titulo [], char autor [], int ano , int quantidadeTotal) {
