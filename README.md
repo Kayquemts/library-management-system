@@ -19,7 +19,7 @@ Sistema de gerenciamento de acervo bibliotecário desenvolvido em linguagem C, u
 ## Compilação
 
 ```bash
-gcc main.c livro.c Arvore.c fila.c lista.c -o biblioteca
+gcc main.c livro.c arvore.c fila.c lista.c -o biblioteca
 ```
 
 > **Atenção:** os nomes dos arquivos diferenciam maiúsculas de minúsculas em Linux.  
