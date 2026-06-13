@@ -1,0 +1,6 @@
+# Ignorar todos os executáveis do Windows
+*.exe
+
+# Ignorar executáveis e arquivos de objeto do Linux/Mac (caso alguém use)
+*.out
+*.o

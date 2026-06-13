@@ -17,10 +17,109 @@ static NoArvore* criarNoArvore(Livro* livro) {
         novoNo->livro = livro;
         novoNo->esquerda = NULL;
         novoNo->direita = NULL;
+        novoNo->altura = 0; // novo no e sempre uma folha (altura 0)
     }
     return novoNo;
 }
 
+// =================================================================
+// FUNCOES AUXILIARES DE BALANCEAMENTO (AVL)
+// =================================================================
+
+// Retorna a altura de um no (-1 se for NULL, seguindo a mesma
+// convencao usada em calcularAlturaArvore)
+static int alturaNo(NoArvore *no) {
+    if (no == NULL) return -1;
+    return no->altura;
+}
+
+// Atualiza a altura de um no com base nos filhos
+static void atualizarAltura(NoArvore *no) {
+    int e = alturaNo(no->esquerda);
+    int d = alturaNo(no->direita);
+    no->altura = 1 + (e > d ? e : d);
+}
+
+// Fator de balanceamento = altura(esquerda) - altura(direita)
+static int fatorBalanceamento(NoArvore *no) {
+    if (no == NULL) return 0;
+    return alturaNo(no->esquerda) - alturaNo(no->direita);
+}
+
+// Rotacao simples para a direita
+//        y                x
+//       / \              / \
+//      x   T3   ===>    T1  y
+//     / \                   / \
+//    T1 T2                T2  T3
+static NoArvore* rotacaoDireita(NoArvore *y) {
+    NoArvore *x  = y->esquerda;
+    NoArvore *t2 = x->direita;
+
+    x->direita = y;
+    y->esquerda = t2;
+
+    atualizarAltura(y);
+    atualizarAltura(x);
+
+    return x; // nova raiz da subarvore
+}
+
+// Rotacao simples para a esquerda
+//      x                    y
+//     / \                  / \
+//    T1  y     ===>       x  T3
+//       / \               / \
+//      T2 T3             T1 T2
+static NoArvore* rotacaoEsquerda(NoArvore *x) {
+    NoArvore *y  = x->direita;
+    NoArvore *t2 = y->esquerda;
+
+    y->esquerda = x;
+    x->direita  = t2;
+
+    atualizarAltura(x);
+    atualizarAltura(y);
+
+    return y; // nova raiz da subarvore
+}
+
+// Aplica as rotacoes necessarias (se houver) para balancear o no
+static NoArvore* balancear(NoArvore *no) {
+    if (no == NULL) return NULL;
+
+    atualizarAltura(no);
+    int fb = fatorBalanceamento(no);
+
+    // Caso Esquerda-Esquerda
+    if (fb > 1 && fatorBalanceamento(no->esquerda) >= 0) {
+        return rotacaoDireita(no);
+    }
+
+    // Caso Esquerda-Direita
+    if (fb > 1 && fatorBalanceamento(no->esquerda) < 0) {
+        no->esquerda = rotacaoEsquerda(no->esquerda);
+        return rotacaoDireita(no);
+    }
+
+    // Caso Direita-Direita
+    if (fb < -1 && fatorBalanceamento(no->direita) <= 0) {
+        return rotacaoEsquerda(no);
+    }
+
+    // Caso Direita-Esquerda
+    if (fb < -1 && fatorBalanceamento(no->direita) > 0) {
+        no->direita = rotacaoDireita(no->direita);
+        return rotacaoEsquerda(no);
+    }
+
+    // Ja esta balanceado
+    return no;
+}
+
+// =================================================================
+// INSERCAO (com balanceamento automatico apos cada insercao)
+// =================================================================
 static NoArvore* inserirNoRecursivo(NoArvore* raiz, Livro* livro) {
     if (raiz == NULL) {
         return criarNoArvore(livro);
@@ -29,19 +128,69 @@ static NoArvore* inserirNoRecursivo(NoArvore* raiz, Livro* livro) {
     // Comparação ultra rápida usando o código inteiro do livro
     if (livro->codigo < raiz->livro->codigo) {
         raiz->esquerda = inserirNoRecursivo(raiz->esquerda, livro);
-    }else if (livro->codigo > raiz->livro->codigo) {
+    } else if (livro->codigo > raiz->livro->codigo) {
         raiz->direita = inserirNoRecursivo(raiz->direita, livro);
-    }else {
+    } else {
         printf("\n[ERRO] O codigo %d ja pertence a outro livro!\n", livro->codigo);
-        free(livro); 
+        free(livro);
+        return raiz; // nada foi alterado, nao precisa rebalancear este ramo
     }
 
-    return raiz;
+    // Apos inserir, rebalanceia o caminho de volta a raiz
+    return balancear(raiz);
 }
 
 void inserirLivroArvore(Arvore * arvore, Livro * livro) {
     if (arvore == NULL || livro == NULL) return;
     arvore->raiz = inserirNoRecursivo(arvore->raiz, livro);
+}
+
+
+// =================================================================
+// BUSCA POR CODIGO (iterativa)
+// =================================================================
+Livro * buscarLivroArvore(Arvore * arvore, int codigo) {
+    if (arvore == NULL) return NULL;
+
+    NoArvore *atual = arvore->raiz;
+
+    while (atual != NULL) {
+        if (codigo == atual->livro->codigo) {
+            return atual->livro;
+        } else if (codigo < atual->livro->codigo) {
+            atual = atual->esquerda;
+        } else {
+            atual = atual->direita;
+        }
+    }
+
+    return NULL; // nao encontrado
+}
+
+
+// =================================================================
+// CONTAGEM DE LIVROS (numero total de nos da arvore)
+// =================================================================
+static int contarNosRecursivo(NoArvore *raiz) {
+    if (raiz == NULL) return 0;
+    return 1 + contarNosRecursivo(raiz->esquerda) + contarNosRecursivo(raiz->direita);
+}
+
+int contarLivros(Arvore * arvore) {
+    if (arvore == NULL) return 0;
+    return contarNosRecursivo(arvore->raiz);
+}
+
+
+// =================================================================
+// ALTURA DA ARVORE
+// =================================================================
+// Como ja mantemos a altura em cada no atualizada pelo AVL,
+// basta consultar a altura armazenada na raiz. Arvore vazia = -1,
+// folha unica = 0 (mesma convencao usada no balanceamento).
+int calcularAlturaArvore(Arvore * arvore) {
+    if (arvore == NULL || arvore->raiz == NULL) return -1;
+    return arvore->raiz->altura;
 }
 
 
@@ -140,41 +289,21 @@ void printarArvoreVisual(Arvore *arvore) {
     printf("-------------------------------------\n");
 }
 
-int contarLivros ( Arvore * arvore ){
-    printf("\n[AVISO] Funcao contarLivros ainda nao implementada.\n");
-    return 0; // Retorna 0 temporariamente
-}
-
-int calcularAlturaArvore ( Arvore * arvore ){
-    printf("\n[AVISO] Funcao calcularAlturaArvore ainda nao implementada.\n");
-    return 0; // Retorna 0 temporariamente
-}
-
-Livro * buscarLivroArvore ( Arvore * arvore , int codigo ) {
-    NoArvore * atual = arvore->raiz ;
-    while (atual != NULL) {
-        if (codigo == atual->livro->codigo) {
-            return atual->livro; // Livro encontrado
-        } else if (codigo < atual->livro->codigo) {
-            atual = atual->esquerda; // Vai para a esquerda
-        } else {
-            atual = atual->direita; // Vai para a direita
-        }
-    }
-    return NULL; // Livro nao encontrado
-}
-
 int obterCodigoLivro (Livro * livro ){
+    if (livro == NULL) return -1;
     return livro->codigo;
 }
 
 int obterQuantidadeDisponivel (Livro * livro ){
+    if (livro == NULL) return -1;
     return livro->quantidadeDisponivel;
 }
 
 void emprestarExemplar (Livro * livro ){
-    printf("\n[AVISO] Funcao emprestarExemplar ainda nao implementada.\n");
+    if (livro != NULL && livro->quantidadeDisponivel > 0)
+        livro->quantidadeDisponivel--;
 }
 void devolverExemplar (Livro * livro ){
-    printf("\n[AVISO] Funcao devolverExemplar ainda nao implementada.\n");
+    if (livro != NULL && livro->quantidadeDisponivel < livro->quantidadeTotal)
+        livro->quantidadeDisponivel++;
 }
