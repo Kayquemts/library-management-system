@@ -1,8 +1,8 @@
 # Sistema de Gerenciamento de Biblioteca
 
-**Disciplina:** Estrutura de Dados — UECe  
+**Disciplina:** Estrutura de Dados — UECE 
 **Professor:** Bonfim Amaro Junior  
-**Equipe:** Lyanderson, Lyedson e Kayque
+**Equipe:** Lyanderson Silva, Lyedson Silva e Kayque Mateus.
 
 ---
 
