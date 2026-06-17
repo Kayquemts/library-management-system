@@ -17,8 +17,8 @@ Lista *criarLista() {
 
 int listaVazia(Lista *lista) {
     if (lista == NULL || lista->inicio == NULL) {
+        printf("A lista esta vazia\n");
         return 1;
-        printf("A lista está vazia");
     }
     return 0;
 }
@@ -41,7 +41,7 @@ void inserirEmprestimo(Lista *lista, Emprestimo emprestimo) {
 
 void listarEmprestimos(Lista *lista) {
 
-    if (lista == NULL || lista->inicio == NULL) {
+    if (listaVazia(lista)) {
         printf("Historico vazio.\n");
         return;
     }

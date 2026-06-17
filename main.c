@@ -33,8 +33,14 @@ int main() {
 
     do {
         exibirMenu();
-        scanf("%d", &opcao);
-        getchar(); /* limpa o '\n' do buffer */
+        char entrada[50];
+        char sobra;
+
+        if (fgets(entrada, sizeof(entrada), stdin) != NULL) {
+            if (sscanf(entrada, "%d %c", &opcao, &sobra) != 1) {
+                opcao = -1;
+            }
+        }
 
         switch (opcao) {
 
@@ -143,36 +149,66 @@ void cadastrarLivro(Arvore *acervo) {
     int  codigo, ano, quantidadeTotal;
     char titulo[100];
     char autor[100];
+    char buffer[100];
+    char sobra;
 
     printf("\n--- CADASTRAR NOVO LIVRO ---\n");
 
-    printf("Codigo       : ");
-    scanf("%d", &codigo);
-    getchar();
+    while (1) {
+        printf("Codigo       : ");
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            if (sscanf(buffer, "%d %c", &codigo, &sobra) == 1) {
+                /* Se o código for válido, verifica duplicata */
+                if (buscarLivroArvore(acervo, codigo) != NULL) {
+                    printf("[ERRO] Ja existe um livro com o codigo %d. Tente outro.\n", codigo);
+                    continue; 
 
-    /* Verifica duplicata antes de pedir todos os dados */
-    if (buscarLivroArvore(acervo, codigo) != NULL) {
-        printf("[ERRO] Ja existe um livro com o codigo %d.\n", codigo);
-        return;
+                }
+
+                if (codigo <= 0) {
+                    printf("[ERRO] O codigo deve ser um numero inteiro positivo. Tente novamente.\n");
+                    continue; 
+                }
+
+                break;
+            }
+        }
+        printf("[ERRO] Codigo invalido! Digite apenas numeros inteiros.\n");
     }
 
     printf("Titulo       : ");
-    scanf(" %[^\n]", titulo);
+    if (fgets(titulo, sizeof(titulo), stdin) != NULL) {
+        titulo[strcspn(titulo, "\n")] = '\0';
+    }
 
     printf("Autor        : ");
-    scanf(" %[^\n]", autor);
+    if (fgets(autor, sizeof(autor), stdin) != NULL) {
+        autor[strcspn(autor, "\n")] = '\0';
+    }
 
-    printf("Ano          : ");
-    scanf("%d", &ano);
-    getchar();
+    while (1) {
+        printf("Ano          : ");
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            if (sscanf(buffer, "%d %c", &ano, &sobra) == 1) {
+                break; 
+            }
+        }
+        printf("[ERRO] Ano invalido! Digite apenas numeros inteiros.\n");
+    }
 
-    printf("Qtd exemplares: ");
-    scanf("%d", &quantidadeTotal);
-    getchar();
-
-    if (quantidadeTotal <= 0) {
-        printf("[ERRO] A quantidade de exemplares deve ser maior que zero.\n");
-        return;
+    while (1) {
+        printf("Qtd exemplares: ");
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            if (sscanf(buffer, "%d %c", &quantidadeTotal, &sobra) == 1) {
+                if (quantidadeTotal > 0) {
+                    break;
+                } else {
+                    printf("[ERRO] A quantidade de exemplares deve ser maior que zero.\n");
+                    continue;
+                }
+            }
+        }
+        printf("[ERRO] Quantidade invalida! Digite apenas numeros inteiros.\n");
     }
 
     Livro *novoLivro = criarLivro(codigo, titulo, autor, ano, quantidadeTotal);
@@ -190,20 +226,38 @@ void cadastrarLivro(Arvore *acervo) {
  * ───────────────────────────────────────────────────────────── */
 void buscarLivro(Arvore *acervo) {
     int codigo;
+    char buffer[100];
+    char sobra;
+    Livro *encontrado = NULL;
 
     printf("\n--- BUSCAR LIVRO ---\n");
-    printf("Codigo do livro: ");
-    scanf("%d", &codigo);
-    getchar();
 
-    Livro *encontrado = buscarLivroArvore(acervo, codigo);
+    while (1) {
+        printf("Codigo do livro (ou 0 para cancelar): ");
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            
+            if (sscanf(buffer, "%d %c", &codigo, &sobra) == 1) {
+                
+                if (codigo == 0) {
+                    printf("[INFO] Busca cancelada.\n");
+                    return;
+                }
 
-    if (encontrado != NULL) {
-        printf("\n[ENCONTRADO]\n");
-        exibirLivro(encontrado);
-    } else {
-        printf("[AVISO] Livro com codigo %d nao encontrado.\n", codigo);
+                encontrado = buscarLivroArvore(acervo, codigo);
+                
+                if (encontrado != NULL) {
+                    break; 
+                } else {
+                    printf("[AVISO] Livro com codigo %d nao encontrado. Tente outro.\n", codigo);
+                    continue; 
+                }
+            }
+        }
+        printf("[ERRO] Codigo invalido! Digite apenas numeros inteiros.\n");
     }
+
+    printf("\n[ENCONTRADO]\n");
+    exibirLivro(encontrado);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -212,22 +266,33 @@ void buscarLivro(Arvore *acervo) {
 void realizarEmprestimo(Arvore *acervo, Fila *filaReservas, Lista *historico) {
     int  codigo;
     char nomeUsuario[100];
+    char buffer[100];
+    char sobra;
+    Livro *livro = NULL;
 
     printf("\n--- REALIZAR EMPRESTIMO ---\n");
 
-    printf("Codigo do livro: ");
-    scanf("%d", &codigo);
-    getchar();
-
-    Livro *livro = buscarLivroArvore(acervo, codigo);
-
-    if (livro == NULL) {
-        printf("[ERRO] Livro com codigo %d nao encontrado no acervo.\n", codigo);
-        return;
+    while (1) {
+        printf("Codigo do livro: ");
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            if (sscanf(buffer, "%d %c", &codigo, &sobra) == 1) {
+                
+                livro = buscarLivroArvore(acervo, codigo);
+                if (livro != NULL) {
+                    break; 
+                } else {
+                    printf("[ERRO] Livro com codigo %d nao encontrado no acervo. Tente novamente.\n", codigo);
+                    continue;
+                }
+            }
+        }
+        printf("[ERRO] Codigo invalido! Digite apenas numeros inteiros.\n");
     }
 
     printf("Nome do usuario: ");
-    scanf(" %[^\n]", nomeUsuario);
+    if (fgets(nomeUsuario, sizeof(nomeUsuario), stdin) != NULL) {
+        nomeUsuario[strcspn(nomeUsuario, "\n")] = '\0';
+    }
 
     /* ── Caso 1: há exemplares disponíveis ── */
     if (obterQuantidadeDisponivel(livro) > 0) {
@@ -259,8 +324,9 @@ void realizarEmprestimo(Arvore *acervo, Fila *filaReservas, Lista *historico) {
             printf("  1 - Sim\n");
             printf("  2 - Nao\n");
             printf("Opcao: ");
-            scanf("%d", &resposta);
-            getchar();
+            if (fgets(buffer, sizeof(buffer), stdin) == NULL || sscanf(buffer, "%d %c", &resposta, &sobra) != 1) {
+                resposta = -1;
+            }
         } while (resposta != 1 && resposta != 2);
 
         if (resposta == 1) {
@@ -283,17 +349,27 @@ void realizarEmprestimo(Arvore *acervo, Fila *filaReservas, Lista *historico) {
  * ───────────────────────────────────────────────────────────── */
 void realizarDevolucao(Arvore *acervo, Fila *filaReservas, Lista *historico) {
     int codigo;
+    char buffer[100];
+    char sobra;
+    Livro *livro = NULL;
 
     printf("\n--- DEVOLVER LIVRO ---\n");
-    printf("Codigo do livro: ");
-    scanf("%d", &codigo);
-    getchar();
 
-    Livro *livro = buscarLivroArvore(acervo, codigo);
-
-    if (livro == NULL) {
-        printf("[ERRO] Livro com codigo %d nao encontrado no acervo.\n", codigo);
-        return;
+    while (1) {
+        printf("Codigo do livro: ");
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            if (sscanf(buffer, "%d %c", &codigo, &sobra) == 1) {
+                
+                livro = buscarLivroArvore(acervo, codigo);
+                if (livro != NULL) {
+                    break; 
+                } else {
+                    printf("[ERRO] Livro com codigo %d nao encontrado no acervo. Tente novamente.\n", codigo);
+                    continue;
+                }
+            }
+        }
+        printf("[ERRO] Codigo invalido! Digite apenas numeros inteiros.\n");
     }
 
     devolverExemplar(livro);
@@ -301,14 +377,6 @@ void realizarDevolucao(Arvore *acervo, Fila *filaReservas, Lista *historico) {
     printf("  Disponiveis agora: %d/%d\n",
            obterQuantidadeDisponivel(livro), livro->quantidadeTotal);
 
-    /*
-     * Percorre a fila procurando a primeira reserva para ESTE livro.
-     * Como a fila pode ter reservas de livros diferentes, precisamos
-     * verificar o código antes de desenfileirar.
-     *
-     * Estratégia: verificamos o início; se for deste livro, atendemos.
-     * Caso contrário, apenas avisamos que existe fila para ele.
-     */
     if (!filaVazia(filaReservas)) {
 
         /* Verifica se o primeiro da fila está esperando por este livro */
